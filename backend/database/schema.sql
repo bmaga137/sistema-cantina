@@ -5,7 +5,7 @@
 PRAGMA foreign_keys = ON;
 
 -- 1. Usuários
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
@@ -16,7 +16,7 @@ CREATE TABLE usuarios (
 );
 
 -- 2. Produtos
-CREATE TABLE produtos (
+CREATE TABLE IF NOT EXISTS produtos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     descricao TEXT,
@@ -30,7 +30,7 @@ CREATE TABLE produtos (
 );
 
 -- 3. Pedidos
-CREATE TABLE pedidos (
+CREATE TABLE IF NOT EXISTS pedidos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'pendente'
@@ -45,7 +45,7 @@ CREATE TABLE pedidos (
 );
 
 -- 4. Itens dos pedidos
-CREATE TABLE itens_pedido (
+CREATE TABLE IF NOT EXISTS itens_pedido (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pedido_id INTEGER NOT NULL,
     produto_id INTEGER NOT NULL,
@@ -66,11 +66,11 @@ CREATE TABLE itens_pedido (
 );
 
 -- Índices para consultas frequentes
-CREATE INDEX idx_pedidos_usuario
+CREATE INDEX IF NOT EXISTS idx_pedidos_usuario
 ON pedidos(usuario_id);
 
-CREATE INDEX idx_itens_pedido
+CREATE INDEX IF NOT EXISTS idx_itens_pedido
 ON itens_pedido(pedido_id);
 
-CREATE INDEX idx_itens_produto
+CREATE INDEX IF NOT EXISTS idx_itens_produto
 ON itens_pedido(produto_id);
