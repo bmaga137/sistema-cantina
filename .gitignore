@@ -70,6 +70,14 @@ web_modules/
 .env.*
 !.env.example
 
+# Bancos SQLite locais e arquivos auxiliares
+/backend/database/*.db
+/backend/database/*.db-*
+/backend/database/*.sqlite
+/backend/database/*.sqlite-*
+/backend/database/*.sqlite3
+/backend/database/*.sqlite3-*
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

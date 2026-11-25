@@ -5,7 +5,10 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const databasePath = path.resolve(__dirname, "../../database/cantina.db");
+const volumePath = process.env.RAILWAY_VOLUME_MOUNT_PATH;
+const databasePath = volumePath
+  ? path.join(volumePath, "cantina.db")
+  : path.resolve(__dirname, "../../database/cantina.db");
 
 const db = new Database(databasePath);
 
