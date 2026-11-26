@@ -1,6 +1,7 @@
-import Database from "better-sqlite3";
+import "dotenv/config";
+import { createClient } from "@libsql/client";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,9 +11,25 @@ const databasePath = volumePath
   ? path.join(volumePath, "cantina.db")
   : path.resolve(__dirname, "../../database/cantina.db");
 
-const db = new Database(databasePath);
+const urlRemota = process.env.TURSO_DATABASE_URL?.trim();
+const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
 
-// Ativa a verificação das chaves estrangeiras
-db.pragma("foreign_keys = ON");
+if (Boolean(urlRemota) !== Boolean(authToken) || (process.env.RENDER === "true" && !urlRemota)) {
+  throw new Error("Configure TURSO_DATABASE_URL e TURSO_AUTH_TOKEN para usar o banco remoto.");
+}
+
+const db = createClient({ url: urlRemota || pathToFileURL(databasePath).href, authToken });
+
+export function executar(sql, args = []) {
+  return db.execute({ sql, args });
+}
+
+export async function consultar(sql, args = []) {
+  return (await executar(sql, args)).rows;
+}
+
+export async function buscar(sql, args = []) {
+  return (await consultar(sql, args))[0];
+}
 
 export default db;

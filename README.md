@@ -59,3 +59,18 @@ Entre pelo mesmo formulário de login. Contas criadas pelo botão **Criar conta*
    Após a confirmação da criação, remova as três variáveis `ADMIN_*` do serviço e mantenha `JWT_SECRET`.
 
 O `.env` e o banco de dados local ficam fora do Git. Consulte a documentação do Railway sobre [Dockerfiles](https://docs.railway.com/builds/dockerfiles), [volumes](https://docs.railway.com/volumes), [domínios públicos](https://docs.railway.com/networking/public-networking) e [SSH](https://docs.railway.com/cli/ssh).
+
+## Publicar no Render com Turso
+
+1. Crie um banco no [Turso](https://app.turso.tech/) e copie a URL e um token de leitura e escrita.
+2. Envie o código ao GitHub. No Render, use um **Web Service** com runtime **Docker**, a raiz do repositório e o `Dockerfile` padrão.
+3. Em **Environment**, salve `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN` com os valores do Turso e mantenha o `JWT_SECRET` do Render. Faça o deploy. O backend inicializa as tabelas automaticamente.
+4. No seu PC, na pasta `backend`, rode `npm ci`. Crie um arquivo `backend/.env.turso` com `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `ADMIN_NAME`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`. Para criar o admin no banco remoto, rode na pasta `backend`:
+
+   ```bash
+   node --env-file=.env.turso src/scripts/createAdmin.js
+   ```
+
+5. Entre como administrador no endereço `.onrender.com` e cadastre os produtos pela seção **Gerenciar cardápio**.
+
+Mantenha as credenciais no Render e nos arquivos de ambiente ignorados pelo Git. O banco remoto começa vazio. Os dados locais precisam ser recadastrados ou importados separadamente. No desenvolvimento, sem as variáveis do Turso no ambiente, o backend usa o SQLite local.

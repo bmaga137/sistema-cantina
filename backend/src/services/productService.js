@@ -1,32 +1,32 @@
-import db from "../config/database.js";
+import { consultar, buscar, executar } from "../config/database.js";
 
 // Listar produtos ativos e disponíveis
-export function getProducts() {
-  return db.prepare(`
+export async function getProducts() {
+  return consultar(`
     SELECT id, nome, descricao, preco_centavos, disponivel
     FROM produtos
     WHERE ativo = 1 AND disponivel = 1
     ORDER BY nome ASC
-  `).all();
+  `);
 }
 
-export function getActiveProducts() {
-  return db.prepare(`
+export async function getActiveProducts() {
+  return consultar(`
     SELECT id, nome, descricao, preco_centavos, disponivel
     FROM produtos
     WHERE ativo = 1
     ORDER BY nome ASC
-  `).all();
+  `);
 }
 
 // Cadastrar produto
-export function createProduct({
+export async function createProduct({
   nome,
   descricao,
   preco_centavos,
   disponivel = 1
 }) {
-  const result = db.prepare(`
+  const result = await executar(`
     INSERT INTO produtos (
       nome,
       descricao,
@@ -34,47 +34,47 @@ export function createProduct({
       disponivel
     )
     VALUES (?, ?, ?, ?)
-  `).run(nome, descricao, preco_centavos, disponivel);
+  `, [nome, descricao, preco_centavos, disponivel]);
 
-  return db.prepare(`
+  return buscar(`
     SELECT id, nome, descricao, preco_centavos, disponivel
     FROM produtos
     WHERE id = ?
-  `).get(result.lastInsertRowid);
+  `, [Number(result.lastInsertRowid)]);
 }
 
-export function updateProduct(id, {
+export async function updateProduct(id, {
   nome,
   descricao,
   preco_centavos,
   disponivel
 }) {
-  const result = db.prepare(`
+  const result = await executar(`
     UPDATE produtos
     SET nome = ?,
         descricao = ?,
         preco_centavos = ?,
         disponivel = ?
     WHERE id = ? AND ativo = 1
-  `).run(nome, descricao, preco_centavos, disponivel, id);
+  `, [nome, descricao, preco_centavos, disponivel, id]);
 
-  if (result.changes === 0) {
+  if (result.rowsAffected === 0) {
     return null;
   }
 
-  return db.prepare(`
+  return buscar(`
     SELECT id, nome, descricao, preco_centavos, disponivel
     FROM produtos
     WHERE id = ?
-  `).get(id);
+  `, [id]);
 }
 
-export function deactivateProduct(id) {
-  const result = db.prepare(`
+export async function deactivateProduct(id) {
+  const result = await executar(`
     UPDATE produtos
     SET ativo = 0, disponivel = 0
     WHERE id = ? AND ativo = 1
-  `).run(id);
+  `, [id]);
 
-  return result.changes > 0;
+  return result.rowsAffected > 0;
 }

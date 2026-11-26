@@ -13,6 +13,7 @@ const schemaPath = path.resolve(
 
 const schema = fs.readFileSync(schemaPath, "utf-8");
 
-db.exec(schema);
-
-console.log("Banco de dados inicializado!");
+export async function initDatabase() {
+    await db.executeMultiple(schema);
+    console.log("Banco de dados inicializado!");
+}

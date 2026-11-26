@@ -7,9 +7,9 @@ import {
 } from "../services/productService.js";
 
 // Listar produtos
-export function listProducts(req, res) {
+export async function listProducts(req, res) {
   try {
-    const produtos = getProducts();
+    const produtos = await getProducts();
 
     return res.status(200).json(produtos);
 
@@ -23,11 +23,11 @@ export function listProducts(req, res) {
 }
 
 // Cadastrar produto
-export function listActiveProducts(req, res) {
-  return res.json(getActiveProducts());
+export async function listActiveProducts(req, res) {
+  return res.json(await getActiveProducts());
 }
 
-export function registerProduct(req, res) {
+export async function registerProduct(req, res) {
   try {
     const {
       nome,
@@ -49,7 +49,7 @@ export function registerProduct(req, res) {
       });
     }
 
-    const produto = createProduct({
+    const produto = await createProduct({
       nome: nome.trim(),
       descricao: descricao ?? "",
       preco_centavos,
@@ -70,7 +70,7 @@ export function registerProduct(req, res) {
   }
 }
 
-export function editProduct(req, res) {
+export async function editProduct(req, res) {
   try {
     const id = Number(req.params.id);
 
@@ -100,7 +100,7 @@ export function editProduct(req, res) {
       });
     }
 
-    const produto = updateProduct(id, {
+    const produto = await updateProduct(id, {
       nome: nome.trim(),
       descricao: descricao ?? "",
       preco_centavos,
@@ -126,7 +126,7 @@ export function editProduct(req, res) {
   }
 }
 
-export function deleteProduct(req, res) {
+export async function deleteProduct(req, res) {
   try {
     const id = Number(req.params.id);
 
@@ -136,7 +136,7 @@ export function deleteProduct(req, res) {
       });
     }
 
-    const desativado = deactivateProduct(id);
+    const desativado = await deactivateProduct(id);
 
     if (!desativado) {
       return res.status(404).json({

@@ -1,26 +1,23 @@
 
-import db from "../config/database.js";
+import { buscar, executar } from "../config/database.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export async function registerUser({ nome, email, senha }) {
-    const existingUser = db.prepare(
-        "SELECT id FROM usuarios WHERE email = ?"
-    ).get(email);
+    const senhaHash = await bcrypt.hash(senha, 10);
 
-    if (existingUser) {
+    const result = await executar(`
+        INSERT INTO usuarios (nome, email, senha_hash)
+        VALUES (?, ?, ?)
+        ON CONFLICT(email) DO NOTHING
+    `, [nome, email, senhaHash]);
+
+    if (result.rowsAffected === 0) {
         throw new Error("EMAIL_ALREADY_EXISTS");
     }
 
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const result = db.prepare(`
-        INSERT INTO usuarios (nome, email, senha_hash)
-        VALUES (?, ?, ?)
-    `).run(nome, email, senhaHash);
-
     return {
-        id: result.lastInsertRowid,
+        id: Number(result.lastInsertRowid),
         nome,
         email,
         tipo: "cliente"
@@ -29,9 +26,7 @@ export async function registerUser({ nome, email, senha }) {
 
 export async function loginUser({ email, senha }) {
   // 1. Procurar usuário pelo e-mail
-  const usuario = db.prepare(
-    "SELECT * FROM usuarios WHERE email = ?"
-  ).get(email);
+  const usuario = await buscar("SELECT * FROM usuarios WHERE email = ?", [email]);
 
   if (!usuario) {
     throw new Error("INVALID_CREDENTIALS");

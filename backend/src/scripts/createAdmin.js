@@ -1,7 +1,7 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import db from "../config/database.js";
-import "../config/initDatabase.js";
+import db, { executar } from "../config/database.js";
+import { initDatabase } from "../config/initDatabase.js";
 
 async function createAdmin() {
   const nome = process.env.ADMIN_NAME;
@@ -16,20 +16,19 @@ async function createAdmin() {
     throw new Error("A senha do administrador deve ter pelo menos 8 caracteres.");
   }
 
-  const existingUser = db.prepare(
-    "SELECT id FROM usuarios WHERE email = ?"
-  ).get(email);
-
-  if (existingUser) {
-    throw new Error("Já existe um usuário com esse e-mail.");
-  }
+  await initDatabase();
 
   const senhaHash = await bcrypt.hash(senha, 10);
 
-  db.prepare(`
+  const resultado = await executar(`
     INSERT INTO usuarios (nome, email, senha_hash, tipo)
     VALUES (?, ?, ?, 'administrador')
-  `).run(nome, email, senhaHash);
+    ON CONFLICT(email) DO NOTHING
+  `, [nome, email, senhaHash]);
+
+  if (resultado.rowsAffected === 0) {
+    throw new Error("Já existe um usuário com esse e-mail.");
+  }
 
   console.log("Administrador criado com sucesso!");
 }
